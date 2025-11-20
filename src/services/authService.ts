@@ -64,3 +64,18 @@ export function getRefreshTokenFromCookie(req: Request): string | null {
   return extractTokenFromCookie(req, COOKIE_NAMES.REFRESH_TOKEN);
 }
 
+export function extractTokenFromHeader(req: Request): string | null {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return null;
+  }
+
+  // Check for "Bearer <token>" format
+  const parts = authHeader.split(' ');
+  if (parts.length === 2 && parts[0] === 'Bearer') {
+    return parts[1];
+  }
+
+  return null;
+}
+

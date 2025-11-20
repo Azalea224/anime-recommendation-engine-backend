@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest, JWTPayload } from '../types/index.js';
 import { getEnv } from '../config/environment.js';
-import { COOKIE_NAMES } from '../utils/constants.js';
+import { getAccessTokenFromCookie, extractTokenFromHeader } from '../services/authService.js';
 import { User } from '../models/User.js';
 import { logger } from '../utils/logger.js';
 
@@ -12,7 +12,10 @@ export async function authenticate(
   next: NextFunction
 ): Promise<void> {
   try {
-    const token = req.cookies?.[COOKIE_NAMES.ACCESS_TOKEN];
+    // Try to get token from Authorization header first, then fall back to cookies
+    const tokenFromHeader = extractTokenFromHeader(req);
+    const tokenFromCookie = getAccessTokenFromCookie(req);
+    const token = tokenFromHeader || tokenFromCookie;
 
     if (!token) {
       res.status(401).json({

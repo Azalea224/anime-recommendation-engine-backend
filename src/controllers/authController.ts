@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthenticatedRequest } from '../types/index.js';
 import { User } from '../models/User.js';
 import { RefreshToken } from '../models/RefreshToken.js';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/authService.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken, extractTokenFromHeader, getRefreshTokenFromCookie } from '../services/authService.js';
 import { BCRYPT_ROUNDS, TOKEN_EXPIRY, COOKIE_NAMES } from '../utils/constants.js';
 import { getEnv } from '../config/environment.js';
 import { logger } from '../utils/logger.js';
@@ -163,7 +163,10 @@ export async function logout(req: AuthenticatedRequest, res: Response): Promise<
 }
 
 export async function refresh(req: AuthenticatedRequest, res: Response): Promise<void> {
-  const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
+  // Try to get refresh token from Authorization header first, then fall back to cookies
+  const refreshTokenFromHeader = extractTokenFromHeader(req);
+  const refreshTokenFromCookie = getRefreshTokenFromCookie(req);
+  const refreshToken = refreshTokenFromHeader || refreshTokenFromCookie;
 
   if (!refreshToken) {
     throw new AppError('No refresh token provided', 401);
