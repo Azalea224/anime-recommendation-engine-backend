@@ -40,15 +40,20 @@ const corsOptions = {
     
     // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // In development, allow localhost origins
-      if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      return callback(null, true);
     }
+    
+    // In development, allow localhost origins
+    if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    
+    // Log the rejected origin for debugging
+    console.log(`CORS: Rejected origin: ${origin}`);
+    console.log(`CORS: Allowed origins: ${allowedOrigins.join(', ')}`);
+    
+    // Return false instead of throwing error to prevent unhandled error
+    callback(null, false);
   },
   credentials: true,
   optionsSuccessStatus: 200,
