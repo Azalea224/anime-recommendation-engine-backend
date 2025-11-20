@@ -29,7 +29,7 @@ app.use(helmet());
 // CORS configuration - support multiple origins for development and production
 const allowedOrigins = process.env.FRONTEND_URL 
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-  : ['http://anrecengine.com:3000'];
+  : ['http://157.230.117.180:3000'];
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
