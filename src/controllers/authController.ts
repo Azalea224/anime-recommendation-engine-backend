@@ -70,6 +70,8 @@ export async function signup(req: AuthenticatedRequest, res: Response): Promise<
         email: user.email,
         username: user.username,
       },
+      accessToken,
+      refreshToken,
     },
     message: 'User created successfully',
   });
@@ -133,6 +135,8 @@ export async function login(req: AuthenticatedRequest, res: Response): Promise<v
         email: user.email,
         username: user.username,
       },
+      accessToken,
+      refreshToken,
     },
     message: 'Login successful',
   });
@@ -208,6 +212,10 @@ export async function refresh(req: AuthenticatedRequest, res: Response): Promise
 
   res.json({
     success: true,
+    data: {
+      accessToken,
+      refreshToken: newRefreshToken,
+    },
     message: 'Token refreshed successfully',
   });
 }
@@ -347,7 +355,12 @@ export async function oauth(req: AuthenticatedRequest, res: Response): Promise<v
 
   logger.info(`OAuth login: ${user.email} via ${provider}`);
 
-  // Redirect to frontend
-  res.redirect(`${FRONTEND_URL}/auth/callback?success=true`);
+  // Redirect to frontend with tokens in URL (frontend should extract and store them)
+  const redirectUrl = new URL(`${FRONTEND_URL}/auth/callback`);
+  redirectUrl.searchParams.set('success', 'true');
+  redirectUrl.searchParams.set('accessToken', accessToken);
+  redirectUrl.searchParams.set('refreshToken', refreshToken);
+  
+  res.redirect(redirectUrl.toString());
 }
 
